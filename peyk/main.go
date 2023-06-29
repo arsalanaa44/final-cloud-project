@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 var db *sql.DB
@@ -20,11 +21,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
 	router := mux.NewRouter()
+	// Add the cors.Default() middleware
+	handler := cors.Default().Handler(router)
 	router.HandleFunc("/subscription", addSubscription).Methods("POST")
 	router.HandleFunc("/history/{coin_name}", getHistory).Methods("GET")
-	http.ListenAndServe(":8080", router)
+	fmt.Println(http.ListenAndServe(":8081", handler))
 }
 
 type Price struct {
@@ -54,7 +56,6 @@ func getHistory(w http.ResponseWriter, r *http.Request) {
 		}
 		prices = append(prices, p)
 	}
-	fmt.Println()
 	json.NewEncoder(w).Encode(prices)
 }
 
