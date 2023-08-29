@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Tracker</title>
+</head>
+<body>
+    <h2>Add Subscription</h2>
+   <form id="subscriptionForm">
+       <label for="userEmail">Email:</label><br>
+       <input type="email" id="userEmail" name="userEmail"><br>
+       <label for="coinName">Coin Name:</label><br>
+       <input type="text" id="coinName" name="coinName"><br>
+       <label for="differencePercentage">Difference Percentage:</label><br>
+       <input type="number" id="differencePercentage" name="differencePercentage"><br>
+       <input type="submit" value="Submit">
+   </form>
+   <h2>Get Coin History</h2>
+   <form id="historyForm">
+       <label for="coinNameHistory">Coin Name:</label><br>
+       <input type="text" id="coinNameHistory" name="coinNameHistory"><br>
+       <input type="submit" value="Search">
+   </form>
+   <table id="historyTable">
+       <thead>
+           <tr>
+               <th>Coin Name</th>
+               <th>Timestamp</th>
+               <th>Price</th>
+           </tr>
+       </thead>
+       <tbody>
+           <!-- History data will go here -->
+       </tbody>
+   </table>
+   <script>
+    document.getElementById('subscriptionForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var userEmail = document.getElementById('userEmail').value;
+        var coinName = document.getElementById('coinName').value;
+        var differencePercentage = parseFloat(document.getElementById('differencePercentage').value);
+        var data = {
+            user_email: userEmail,
+            coin_name: coinName,
+            difference_percentage: differencePercentage
+        };
+        fetch('http://localhost:8081/subscription', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.text())
+        .then(data => alert(data))
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+ 
+    document.getElementById('historyForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var coinName = document.getElementById('coinNameHistory').value;
+        fetch('http://localhost:8081/history/' + coinName)
+        .then(response => response.json())
+        .then(data => {
+            var tableBody = document.getElementById('historyTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            data.forEach(function(item) {
+                var row = tableBody.insertRow();
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                cell1.innerHTML = item.coin_name;
+                cell2.innerHTML = item.timestamp;
+                cell3.innerHTML = item.price;
+            });
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    });
+    </script>
+</body>
+</html>
+
+   
